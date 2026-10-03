@@ -1,4 +1,4 @@
-.PHONY: help install run test docker-build docker-up docker-down docker-logs docker-clean
+.PHONY: help install run test test-verbose docker-build docker-up docker-down docker-logs docker-clean
 
 PYTHON := poetry run python
 APP := main.py
@@ -9,6 +9,7 @@ help:
 	@echo "  make install      - instala as dependencias do backend"
 	@echo "  make run          - roda a aplicacao localmente"
 	@echo "  make test         - roda os testes"
+	@echo "  make test-verbose - roda os testes com detalhes"
 	@echo "  make docker-build - constroi as imagens docker"
 	@echo "  make docker-up    - sobe os containers (backend + db)"
 	@echo "  make docker-down  - derruba os containers"
@@ -23,6 +24,9 @@ run:
 
 test:
 	cd backend && poetry run pytest
+
+test-verbose:
+	cd backend && poetry run pytest -v
 
 docker-build:
 	$(COMPOSE) build
