@@ -1,4 +1,4 @@
-.PHONY: help install run test test-verbose test-unit test-integration lint migrate makemigrations docker-build docker-up docker-down docker-logs docker-clean
+.PHONY: help install run test test-verbose test-unit test-integration lint migrate makemigrations docker-build docker-up docker-down docker-logs docker-clean frontend-install frontend-lint frontend-format frontend-test frontend-build frontend-test-e2e check-all
 
 PYTHON := poetry run python
 APP := main.py
@@ -62,3 +62,23 @@ docker-logs:
 
 docker-clean:
 	$(COMPOSE) down -v --rmi all
+
+	frontend-install:
+	cd frontend && npm ci
+
+frontend-lint:
+	cd frontend && npm run lint
+
+frontend-format:
+	cd frontend && npm run format:check
+
+frontend-test:
+	cd frontend && npm run test
+
+frontend-build:
+	cd frontend && npm run build
+
+frontend-test-e2e:
+	cd frontend && npm run test:e2e
+
+check-all: lint test frontend-lint frontend-format frontend-test frontend-build frontend-test-e2e
