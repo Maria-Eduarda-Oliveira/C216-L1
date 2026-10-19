@@ -1,27 +1,11 @@
-import pytest
-from fastapi.testclient import TestClient
-from main import app
-from app.routers import tasks as tasks_router
-
-client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def limpar_banco():
-    tasks_router.tasks_db.clear()
-    tasks_router.next_id = 1
-    yield
-    tasks_router.tasks_db.clear()
-
-
-def test_criar_task():
+def test_criar_task(client):
     response = client.post("/tasks/", json={"titulo": "Estudar FastAPI"})
     assert response.status_code == 201
     assert response.json()["titulo"] == "Estudar FastAPI"
     assert response.json()["concluida"] is False
 
 
-def test_listar_tasks():
+def test_listar_tasks(client):
     client.post("/tasks/", json={"titulo": "Tarefa 1"})
     client.post("/tasks/", json={"titulo": "Tarefa 2"})
     response = client.get("/tasks/")
@@ -29,7 +13,7 @@ def test_listar_tasks():
     assert len(response.json()) == 2
 
 
-def test_listar_tasks_com_query_param():
+def test_listar_tasks_com_query_param(client):
     client.post(
         "/tasks/", json={"titulo": "Tarefa concluida", "concluida": True})
     client.post(
@@ -40,19 +24,19 @@ def test_listar_tasks_com_query_param():
     assert response.json()[0]["titulo"] == "Tarefa concluida"
 
 
-def test_obter_task_existente():
+def test_obter_task_existente(client):
     criada = client.post("/tasks/", json={"titulo": "Tarefa unica"}).json()
     response = client.get(f"/tasks/{criada['id']}")
     assert response.status_code == 200
     assert response.json()["titulo"] == "Tarefa unica"
 
 
-def test_obter_task_inexistente():
+def test_obter_task_inexistente(client):
     response = client.get("/tasks/999")
     assert response.status_code == 404
 
 
-def test_atualizar_task_put():
+def test_atualizar_task_put(client):
     criada = client.post("/tasks/", json={"titulo": "Antiga"}).json()
     response = client.put(
         f"/tasks/{criada['id']}", json={"titulo": "Nova", "concluida": True})
@@ -61,7 +45,7 @@ def test_atualizar_task_put():
     assert response.json()["concluida"] is True
 
 
-def test_atualizar_task_patch():
+def test_atualizar_task_patch(client):
     criada = client.post(
         "/tasks/", json={"titulo": "Parcial", "concluida": False}).json()
     response = client.patch(f"/tasks/{criada['id']}", json={"concluida": True})
@@ -70,7 +54,7 @@ def test_atualizar_task_patch():
     assert response.json()["concluida"] is True
 
 
-def test_deletar_task():
+def test_deletar_task(client):
     criada = client.post("/tasks/", json={"titulo": "Para deletar"}).json()
     response = client.delete(f"/tasks/{criada['id']}")
     assert response.status_code == 204
@@ -78,6 +62,6 @@ def test_deletar_task():
     assert response_get.status_code == 404
 
 
-def test_deletar_task_inexistente():
+def test_deletar_task_inexistente(client):
     response = client.delete("/tasks/999")
     assert response.status_code == 404
