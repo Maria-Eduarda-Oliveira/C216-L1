@@ -1,5 +1,6 @@
 import pytest
-from app.utils import somar, dividir, eh_par, eh_palindromo
+
+from app.utils import dividir, eh_palindromo, eh_par, somar
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-.PHONY: help install run test test-verbose test-unit test-integration docker-build docker-up docker-down docker-logs docker-clean
+.PHONY: help install run test test-verbose test-unit test-integration lint migrate makemigrations docker-build docker-up docker-down docker-logs docker-clean
 
 PYTHON := poetry run python
 APP := main.py
@@ -12,6 +12,9 @@ help:
 	@echo "  make test-verbose     - roda todos os testes com detalhes"
 	@echo "  make test-unit        - roda apenas os testes unitarios"
 	@echo "  make test-integration - roda apenas os testes de integracao"
+	@echo "  make lint             - roda o linter (ruff)"
+	@echo "  make migrate          - aplica as migrations do Alembic"
+	@echo "  make makemigrations   - gera uma nova migration do Alembic"
 	@echo "  make docker-build     - constroi as imagens docker"
 	@echo "  make docker-up        - sobe os containers (backend + db)"
 	@echo "  make docker-down      - derruba os containers"
@@ -35,6 +38,15 @@ test-unit:
 
 test-integration:
 	cd backend && poetry run pytest tests/integration -v
+
+lint:
+	cd backend && poetry run ruff check .
+
+migrate:
+	cd backend && poetry run alembic upgrade head
+
+makemigrations:
+	cd backend && poetry run alembic revision --autogenerate -m "auto"
 
 docker-build:
 	$(COMPOSE) build
