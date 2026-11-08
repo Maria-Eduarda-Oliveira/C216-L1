@@ -4,35 +4,90 @@ on:
   pull_request:
     paths:
       - "frontend/**"
+      - "backend/**"
       - ".github/workflows/ci-frontend.yml"
   push:
     branches:
       - main
     paths:
       - "frontend/**"
+      - "backend/**"
       - ".github/workflows/ci-frontend.yml"
 
 jobs:
   frontend:
     name: Biome, Vitest, Build e Playwright
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar Poetry
+        run: pip install poetry
+
+      - name: Instalar dependencias do backend
+        working-directory: backend
+        run: poetry install --no-interaction --no-ansi
+
+      - name: Aplicar migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/app_db
+        run: poetry run alembic upgrade head
+
+      - name: Subir a API em segundo plano
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/app_db
+          CORS_ORIGINS: http://localhost:4173
+        run: poetry run uvicorn main:app --host 0.0.0.0 --port 8000 &
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
+
+      - name: Instalar dependencias do frontend
+        working-directory: frontend
+        run: npm ci
+
       - run: npm run lint
+        working-directory: frontend
       - run: npm run format:check
+        working-directory: frontend
       - run: npm run test
+        working-directory: frontend
       - run: npm run build
+        working-directory: frontend
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+        working-directory: frontend
+
+      - name: Rodar E2E
+        working-directory: frontend
+        env:
+          VITE_API_URL: http://localhost:8000
+        run: npm run test:e2e
+
       - name: Upload Playwright Report
         if: failure()
         uses: actions/upload-artifact@v4
