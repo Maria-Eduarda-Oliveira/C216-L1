@@ -82,3 +82,21 @@ frontend-test-e2e:
 	cd frontend && npm run test:e2e
 
 check-all: lint test frontend-lint frontend-format frontend-test frontend-build frontend-test-e2e
+
+up-build:
+	docker compose up -d --build
+
+ps:
+	docker compose ps
+
+db-upgrade:
+	cd backend && poetry run alembic upgrade head
+
+db-current:
+	cd backend && poetry run alembic current
+
+frontend-check:
+	cd frontend && npm run lint && npm run format:check
+
+e2e:
+	cd frontend && npm run test:e2e

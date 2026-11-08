@@ -1,24 +1,25 @@
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
 
-class TaskBase(BaseModel):
-    titulo: str
-    descricao: str | None = None
+class ItemBase(BaseModel):
+    nome: str
+    descricao: Optional[str] = None
     concluida: bool = False
 
 
-class TaskCreate(TaskBase):
+class ItemCreate(ItemBase):
     pass
 
 
-class TaskUpdate(BaseModel):
-    titulo: str | None = None
-    descricao: str | None = None
-    concluida: bool | None = None
+class ItemUpdate(BaseModel):
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    concluida: Optional[bool] = None
 
 
-class Task(TaskBase):
+class Item(ItemBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
