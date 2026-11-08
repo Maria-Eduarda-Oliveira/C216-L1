@@ -5,8 +5,9 @@ export function ItemForm({ onAdicionar }) {
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [erros, setErros] = useState({});
+  const [enviando, setEnviando] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const errosEncontrados = validarItem({ nome, descricao });
     setErros(errosEncontrados);
@@ -15,9 +16,17 @@ export function ItemForm({ onAdicionar }) {
       return;
     }
 
-    onAdicionar({ nome: nome.trim(), descricao: descricao.trim() });
-    setNome('');
-    setDescricao('');
+    setEnviando(true);
+    try {
+      await onAdicionar({ nome: nome.trim(), descricao: descricao.trim() });
+      setNome('');
+      setDescricao('');
+      setErros({});
+    } catch (erro) {
+      setErros({ nome: erro.message });
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -51,9 +60,10 @@ export function ItemForm({ onAdicionar }) {
 
       <button
         type="submit"
-        className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        disabled={enviando}
+        className="self-start rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        Adicionar item
+        {enviando ? 'Adicionando...' : 'Adicionar item'}
       </button>
     </form>
   );

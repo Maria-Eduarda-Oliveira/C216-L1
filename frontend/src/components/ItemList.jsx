@@ -1,6 +1,6 @@
 import { ItemCard } from './ItemCard';
 
-export function ItemList({ items, onRemover }) {
+export function ItemList({ items }) {
   if (items.length === 0) {
     return <p className="text-sm text-gray-500">Nenhum item cadastrado ainda.</p>;
   }
@@ -8,7 +8,7 @@ export function ItemList({ items, onRemover }) {
   return (
     <ul className="flex flex-col gap-3">
       {items.map((item) => (
-        <ItemCard key={item.id} item={item} onRemover={onRemover} />
+        <ItemCard key={item.id} item={item} />
       ))}
     </ul>
   );
