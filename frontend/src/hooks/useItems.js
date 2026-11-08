@@ -1,32 +1,32 @@
-import { useCallback, useEffect, useState } from 'react'
-import { createItem, listItems } from '../services/items'
+import { useCallback, useEffect, useState } from 'react';
+import { createItem, listItems } from '../services/items';
 
 export function useItems() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const carregarItems = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const dados = await listItems()
-      setItems(dados)
+      const dados = await listItems();
+      setItems(dados);
     } catch {
-      setError('Nao foi possivel carregar os itens. Tente novamente.')
+      setError('Nao foi possivel carregar os itens. Tente novamente.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    carregarItems()
-  }, [carregarItems])
+    carregarItems();
+  }, [carregarItems]);
 
   async function addItem(item) {
-    const novoItem = await createItem(item)
-    setItems((prev) => [...prev, novoItem])
+    const novoItem = await createItem(item);
+    setItems((prev) => [...prev, novoItem]);
   }
 
-  return { items, loading, error, addItem, recarregar: carregarItems }
+  return { items, loading, error, addItem, recarregar: carregarItems };
 }
