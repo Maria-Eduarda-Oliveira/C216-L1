@@ -1,0 +1,34 @@
+name: CI - Docker Compose
+
+on:
+  push:
+    branches: [projeto-final]
+  pull_request:
+    branches: [main]
+
+jobs:
+  compose:
+    name: Subir db, api e frontend com Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Subir os servicos e esperar ficarem saudaveis
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Testar API, persistencia e frontend
+        run: |
+          curl -sf http://localhost:8000/health
+          curl -sf -X POST http://localhost:8000/equipamentos/ \
+            -H "Content-Type: application/json" \
+            -d '{"nome": "Compressor CI", "local": "Galpao A"}'
+          curl -sf http://localhost:8000/equipamentos/ | grep "Compressor CI"
+          curl -sf http://localhost:5173 | grep "root"
+
+      - name: Mostrar logs em caso de falha
+        if: failure()
+        run: docker compose logs
+
+      - name: Derrubar os servicos
+        if: always()
+        run: docker compose down -v
