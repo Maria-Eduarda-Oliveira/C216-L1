@@ -4,17 +4,20 @@ export function EquipamentoForm({ inicial, rotulo, onSalvar, onCancelar }) {
   const [nome, setNome] = useState(inicial?.nome ?? '');
   const [local, setLocal] = useState(inicial?.local ?? '');
   const [erro, setErro] = useState(null);
+  const [sucesso, setSucesso] = useState(null);
   const [enviando, setEnviando] = useState(false);
 
   async function enviar(evento) {
     evento.preventDefault();
     setErro(null);
+    setSucesso(null);
     setEnviando(true);
     try {
       await onSalvar({ nome: nome.trim(), local: local.trim() || null });
       if (!inicial) {
         setNome('');
         setLocal('');
+        setSucesso('Equipamento cadastrado com sucesso');
       }
     } catch (e) {
       setErro(e.message);
@@ -47,6 +50,11 @@ export function EquipamentoForm({ inicial, rotulo, onSalvar, onCancelar }) {
           className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
         />
       </div>
+      {sucesso && (
+        <p role="status" className="text-sm text-green-700">
+          {sucesso}
+        </p>
+      )}
       {erro && (
         <p role="alert" className="text-sm text-red-600">
           {erro}
