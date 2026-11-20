@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Segredos
+.env
+
+# Frontend
+node_modules/
+dist/
+playwright-report/
+test-results/
+
+# Editor / sistema
+.vscode/
+Thumbs.db
